@@ -1,0 +1,747 @@
+SQL> @oml4sql-singular-value-decomposition
+SQL> -----------------------------------------------------------------------
+SQL> --   Oracle Machine Learning for SQL (OML4SQL) 23ai
+SQL> --
+SQL> --   Singular Value Decomposition Demo - dmsvddemo.sql
+SQL> --
+SQL> --   Copyright (c) 2024 Oracle Corporation and/or its affilitiates.
+SQL> --
+SQL> --  The Universal Permissive License (UPL), Version 1.0
+SQL> --
+SQL> --  https://oss.oracle.com/licenses/upl/
+SQL> -----------------------------------------------------------------------
+SQL> SET ECHO ON
+SQL> SET FEEDBACK 1
+SQL> SET NUMWIDTH 10
+SQL> SET LINESIZE 80
+SQL> SET TRIMSPOOL ON
+SQL> SET TAB OFF
+SQL> SET PAGESIZE 100
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                            SAMPLE PROBLEMS
+SQL> -----------------------------------------------------------------------
+SQL> -- Extract SVD features for:
+SQL> -- 1. Visualization
+SQL> -- 2. Data compression
+SQL> -- Each use case will be illustrated separately.
+SQL> --
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> -----------------------------------------------------------------------
+SQL> -- VISUALIZATIION USE CASE
+SQL> --
+SQL> -- Goal: Produce the top two PCA projections to visualize the data
+SQL> -----------------------------------------------------------------------
+SQL> -- Cleanup for repeat runs
+SQL> -- Cleanup old data view
+SQL> BEGIN EXECUTE IMMEDIATE 'DROP VIEW svd_sh_sample_build_num';
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL> -- Cleanup old settings table
+SQL> BEGIN EXECUTE IMMEDIATE 'DROP TABLE svd_sh_sample_settings';
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL> -- Cleanup old model with the same name
+SQL> BEGIN DBMS_DATA_MINING.DROP_MODEL('SVD_SH_sample');
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> -- Create a build data view with only numerical columns
+SQL> CREATE VIEW svd_sh_sample_build_num AS
+  2    SELECT CUST_ID, AGE, YRS_RESIDENCE, AFFINITY_CARD, CRICKET,
+  3      BASEBALL, TENNIS, SOCCER,
+  4      GOLF, UNKNOWN, MISC
+  5    FROM MINING_DATA_BUILD_V;
+
+View SVD_SH_SAMPLE_BUILD_NUMは作成されました。
+
+SQL>
+SQL> -- Build an SVD model using CREATE_MODEL2
+SQL> DECLARE
+  2      v_setlst DBMS_DATA_MINING.SETTING_LIST;
+  3  BEGIN
+  4      -- Select SVD as the Feature Extraction algorithm
+  5      v_setlst('ALGO_NAME') := 'ALGO_SINGULAR_VALUE_DECOMP';
+  6      -- Turn on automatic data preparation
+  7      v_setlst('PREP_AUTO') := 'OFF';
+  8      -- Select PCA mode of scoring
+  9      v_setlst('SVDS_SCORING_MODE') := 'SVDS_SCORING_PCA';
+ 10      v_setlst('PREP_SHIFT_2DNUM') := 'PREP_SHIFT_MEAN';
+ 11      v_setlst('PREP_SCALE_2DNUM') := 'PREP_SCALE_STDDEV';
+ 12      -- Examples of possible overrides are:
+ 13      -- v_setlst('FEAT_NUM_FEATURES') := '10';
+ 14      -- v_setlst('SVDS_U_MATRIX_OUTPUT') := 'SVDS_U_MATRIX_ENABLE';
+ 15      -- v_setlst('ODMS_APPROXIMATE_COMPUTATION') := 'ODMS_APPR_COMP_ENABLE';
+ 16
+ 17      DBMS_DATA_MINING.CREATE_MODEL2(
+ 18          MODEL_NAME          => 'SVD_SH_sample',
+ 19          MINING_FUNCTION     => 'FEATURE_EXTRACTION',
+ 20          DATA_QUERY          => 'SELECT * FROM svd_sh_sample_build_num',
+ 21          SET_LIST            => v_setlst,
+ 22          CASE_ID_COLUMN_NAME => 'cust_id');
+ 23  END;
+ 24  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> -- Display model settings
+SQL> column setting_name format a30
+SQL> column setting_value format a30
+SQL> SELECT setting_name, setting_value
+  2    FROM user_mining_model_settings
+  3   WHERE model_name = 'SVD_SH_SAMPLE'
+  4  ORDER BY setting_name;
+
+SETTING_NAME                   SETTING_VALUE
+------------------------------ ------------------------------
+ALGO_NAME                      ALGO_SINGULAR_VALUE_DECOMP
+ODMS_DETAILS                   ODMS_ENABLE
+ODMS_MISSING_VALUE_TREATMENT   ODMS_MISSING_VALUE_AUTO
+ODMS_SAMPLING                  ODMS_SAMPLING_DISABLE
+PREP_AUTO                      OFF
+PREP_SCALE_2DNUM               PREP_SCALE_STDDEV
+PREP_SHIFT_2DNUM               PREP_SHIFT_MEAN
+SVDS_SCORING_MODE              SVDS_SCORING_PCA
+SVDS_U_MATRIX_OUTPUT           SVDS_U_MATRIX_DISABLE
+
+9行が選択されました。
+
+SQL>
+SQL> -- Display model signature
+SQL> column attribute_name format a40
+SQL> column attribute_type format a20
+SQL> SELECT attribute_name, attribute_type
+  2    FROM user_mining_model_attributes
+  3   WHERE model_name = 'SVD_SH_SAMPLE'
+  4  ORDER BY attribute_name;
+
+ATTRIBUTE_NAME                           ATTRIBUTE_TYPE
+---------------------------------------- --------------------
+AFFINITY_CARD                            NUMERICAL
+AGE                                      NUMERICAL
+BASEBALL                                 NUMERICAL
+CRICKET                                  NUMERICAL
+GOLF                                     NUMERICAL
+MISC                                     NUMERICAL
+ORA$VECTOR                               VECTOR
+SOCCER                                   NUMERICAL
+TENNIS                                   NUMERICAL
+UNKNOWN                                  NUMERICAL
+YRS_RESIDENCE                            NUMERICAL
+
+11行が選択されました。
+
+SQL>
+SQL> -- Display model details
+SQL> --
+SQL>
+SQL> -- Get a list of model views
+SQL> col view_name format a30
+SQL> col view_type format a50
+SQL> SELECT view_name, view_type FROM user_mining_model_views
+  2    WHERE model_name='SVD_SH_SAMPLE'
+  3    ORDER BY view_name;
+
+VIEW_NAME
+------------------------------
+VIEW_TYPE
+--------------------------------------------------
+DM$VESVD_SH_SAMPLE
+Singular Value Decomposition S Matrix
+
+DM$VGSVD_SH_SAMPLE
+Global Name-Value Pairs
+
+DM$VNSVD_SH_SAMPLE
+Normalization and Missing Value Handling
+
+DM$VSSVD_SH_SAMPLE
+Computed Settings
+
+DM$VUSVD_SH_SAMPLE
+Singular Value Decomposition U Matrix
+
+DM$VVSVD_SH_SAMPLE
+Singular Value Decomposition V Matrix
+
+DM$VWSVD_SH_SAMPLE
+Model Build Alerts
+
+
+7行が選択されました。
+
+SQL>
+SQL> -- The model details return the SVD decomposition matrices.
+SQL> -- The user can specify the type of matrix. If no matrix type is provided
+SQL> -- all stored matrices are returned.
+SQL> -- In the current use case only the S matrix (singular values and variances)
+SQL> -- and the V matrix (PCA bases) are stored in the model.
+SQL> column value format 9999999.99
+SQL> column variance format 999999999999.9
+SQL> column pct_cum_variance format 999999.9
+SQL>
+SQL> ---- S matrix
+SQL> select feature_id, VALUE, variance, pct_cum_variance
+  2  FROM DM$VESVD_SH_SAMPLE;
+
+FEATURE_ID       VALUE        VARIANCE PCT_CUM_VARIANCE
+---------- ----------- --------------- ----------------
+         1       70.13             3.3             36.5
+         2       52.92             1.9             57.2
+         3       40.49             1.1             69.4
+         4       38.49             1.0             80.3
+         5       33.95              .8             88.9
+         6       25.11              .4             93.6
+         7       20.58              .3             96.7
+         8       17.59              .2             99.0
+         9       11.69              .1            100.0
+
+9行が選択されました。
+
+SQL>
+SQL> ---- V matrix
+SQL> select feature_id, attribute_name, value
+  2  from DM$VVSVD_SH_sample
+  3  ORDER BY feature_id, attribute_name;
+
+FEATURE_ID ATTRIBUTE_NAME                                 VALUE
+---------- ---------------------------------------- -----------
+         1 AFFINITY_CARD                                    .25
+           AGE                                              .49
+           BASEBALL                                        -.14
+           CRICKET                                         -.13
+           MISC                                            -.03
+           SOCCER                                           .04
+           TENNIS                                           .49
+           UNKNOWN                                         -.47
+           YRS_RESIDENCE                                    .45
+         2 AFFINITY_CARD                                    .09
+           AGE                                              .08
+           BASEBALL                                         .69
+           CRICKET                                          .69
+           MISC                                            -.10
+           SOCCER                                           .06
+           TENNIS                                           .08
+           UNKNOWN                                         -.09
+           YRS_RESIDENCE                                    .09
+         3 AFFINITY_CARD                                    .49
+           AGE                                             -.15
+           BASEBALL                                        -.04
+           CRICKET                                         -.03
+           MISC                                             .16
+           SOCCER                                           .83
+           TENNIS                                          -.12
+           UNKNOWN                                          .09
+           YRS_RESIDENCE                                    .03
+         4 AFFINITY_CARD                                   -.12
+           AGE                                              .06
+           BASEBALL                                         .08
+           CRICKET                                          .07
+           MISC                                             .98
+           SOCCER                                          -.08
+           TENNIS                                           .07
+           UNKNOWN                                         -.05
+           YRS_RESIDENCE                                   -.01
+         5 AFFINITY_CARD                                    .81
+           AGE                                             -.14
+           BASEBALL                                        -.00
+           CRICKET                                         -.00
+           MISC                                             .08
+           SOCCER                                          -.54
+           TENNIS                                          -.10
+           UNKNOWN                                          .11
+           YRS_RESIDENCE                                   -.00
+         6 AFFINITY_CARD                                   -.13
+           AGE                                              .01
+           BASEBALL                                        -.00
+           CRICKET                                          .01
+           MISC                                             .03
+           SOCCER                                          -.05
+           TENNIS                                          -.23
+           UNKNOWN                                          .49
+           YRS_RESIDENCE                                    .83
+         7 AFFINITY_CARD                                    .07
+           AGE                                              .49
+           BASEBALL                                         .04
+           CRICKET                                         -.03
+           MISC                                            -.02
+           SOCCER                                           .05
+           TENNIS                                           .41
+           UNKNOWN                                          .70
+           YRS_RESIDENCE                                   -.29
+         8 AFFINITY_CARD                                   -.05
+           AGE                                             -.68
+           BASEBALL                                        -.00
+           CRICKET                                          .00
+           MISC                                            -.01
+           SOCCER                                          -.01
+           TENNIS                                           .71
+           UNKNOWN                                          .12
+           YRS_RESIDENCE                                    .12
+         9 AFFINITY_CARD                                   -.00
+           AGE                                              .03
+           BASEBALL                                        -.71
+           CRICKET                                          .71
+           MISC                                             .00
+           SOCCER                                          -.00
+           TENNIS                                           .02
+           UNKNOWN                                          .03
+           YRS_RESIDENCE                                   -.03
+
+81行が選択されました。
+
+SQL>
+SQL> -- Display the high-level model details
+SQL> column name format a30
+SQL> column string_value format 99999.99
+SQL> column string_value format a20
+SQL> SELECT name, string_value, numeric_value
+  2  FROM DM$VGSVD_SH_SAMPLE
+  3  ORDER BY name;
+
+NAME                           STRING_VALUE         NUMERIC_VALUE
+------------------------------ -------------------- -------------
+NUM_COMPONENTS                                              9.000
+NUM_ROWS                                                 1500.000
+SUGGESTED_CUTOFF                                            2.000
+
+3行が選択されました。
+
+SQL>
+SQL> -- Compute the top two PCA projections that will be used for visualization
+SQL> column proj1 format 9.9999999
+SQL> column proj2 format 9.9999999
+SQL> SELECT FEATURE_VALUE(svd_sh_sample, 1 USING *) proj1,
+  2         FEATURE_VALUE(svd_sh_sample, 2 USING *) proj2
+  3  FROM svd_sh_sample_build_num
+  4  WHERE CUST_ID <= 101510
+  5  ORDER BY 1, 2;
+
+PROJ1 PROJ2
+----- -----
+-2.8556790 .6395428
+-2.5377713 -.7477914
+-2.3346291 .7312849
+-2.2988758 .7370177
+-1.7708988 .9384214
+-.0151149 1.2711790
+.3184622 1.2049725
+.4257221 1.2221709
+1.0540319 1.3311114
+1.9245745 -1.3227314
+
+10行が選択されました。
+
+SQL>
+SQL> -- Identify the three input attributes that most impact the top PCA projection
+SQL> -- for customer 101501
+SQL> set long 10000
+SQL> SELECT FEATURE_DETAILS(svd_sh_sample, 1, 3 USING *) proj1det
+  2  FROM svd_sh_sample_build_num
+  3  WHERE CUST_ID = 101501;
+
+PROJ1DET
+--------------------------------------------------------------------------------
+<Details algorithm="Singular Value Decomposition" feature="1">
+<Attribute name="TENNIS" actualValue="1" weight=".352" rank="1"/>
+<Attribute name="UNKNOWN" actualValue="0" weight=".249" rank="2"/>
+<Attribute name="AGE" actualValue="30" weight=".063" rank="3"/>
+</Details>
+
+1行が選択されました。
+
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> -----------------------------------------------------------------------
+SQL> -- Compression USE CASE
+SQL> --
+SQL> -- Goal: Compress the data and measure the reconstruction error.
+SQL> -----------------------------------------------------------------------
+SQL> -- Cleanup for repeat runs
+SQL> -- Cleanup old transactional table
+SQL> BEGIN EXECUTE IMMEDIATE 'DROP TABLE svd_sh_sample_build_num_piv';
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL> -- Cleanup old reconstruction table
+SQL> BEGIN EXECUTE IMMEDIATE 'DROP TABLE svd_sh_sample_build_num_recon';
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL> -- Cleanup old settings table
+SQL> BEGIN EXECUTE IMMEDIATE 'DROP TABLE svd_sh_sample_settings';
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL> -- Cleanup old model with the same name
+SQL> BEGIN DBMS_DATA_MINING.DROP_MODEL('SVD_SH_sample');
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> -- Build an SVD model using CREATE_MODEL2
+SQL> DECLARE
+  2      v_setlst DBMS_DATA_MINING.SETTING_LIST;
+  3  BEGIN
+  4      -- Select SVD as the Feature Extraction algorithm
+  5      v_setlst('ALGO_NAME') := 'ALGO_SINGULAR_VALUE_DECOMP';
+  6      -- Request the output of the U matrix values (not produced by default)
+  7      v_setlst('SVDS_U_MATRIX_OUTPUT') := 'SVDS_U_MATRIX_ENABLE';
+  8      v_setlst('PREP_AUTO') := 'OFF';
+  9      -- Examples of possible overrides are:
+ 10      -- v_setlst('FEAT_NUM_FEATURES') := '10';
+ 11      -- v_setlst('PREP_AUTO') := 'ON';
+ 12      -- v_setlst('SVDS_SCORING_MODE') := 'SVDS_SCORING_PCA';
+ 13      -- v_setlst('ODMS_APPROXIMATE_COMPUTATION') := 'ODMS_APPR_COMP_ENABLE';
+ 14
+ 15      DBMS_DATA_MINING.CREATE_MODEL2(
+ 16          MODEL_NAME          => 'SVD_SH_sample',
+ 17          MINING_FUNCTION     => 'FEATURE_EXTRACTION',
+ 18          DATA_QUERY          => 'SELECT * FROM svd_sh_sample_build_num',
+ 19          SET_LIST            => v_setlst,
+ 20          CASE_ID_COLUMN_NAME => 'cust_id');
+ 21  END;
+ 22  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> -- Display model settings
+SQL> column setting_name format a30
+SQL> column setting_value format a30
+SQL> SELECT setting_name, setting_value
+  2    FROM user_mining_model_settings
+  3   WHERE model_name = 'SVD_SH_SAMPLE'
+  4  ORDER BY setting_name;
+
+SETTING_NAME                   SETTING_VALUE
+------------------------------ ------------------------------
+ALGO_NAME                      ALGO_SINGULAR_VALUE_DECOMP
+ODMS_DETAILS                   ODMS_ENABLE
+ODMS_MISSING_VALUE_TREATMENT   ODMS_MISSING_VALUE_AUTO
+ODMS_SAMPLING                  ODMS_SAMPLING_DISABLE
+PREP_AUTO                      OFF
+SVDS_SCORING_MODE              SVDS_SCORING_SVD
+SVDS_U_MATRIX_OUTPUT           SVDS_U_MATRIX_ENABLE
+
+7行が選択されました。
+
+SQL>
+SQL> -- Display model signature
+SQL> column attribute_name format a40
+SQL> column attribute_type format a20
+SQL> SELECT attribute_name, attribute_type
+  2    FROM user_mining_model_attributes
+  3   WHERE model_name = 'SVD_SH_SAMPLE'
+  4  ORDER BY attribute_name;
+
+ATTRIBUTE_NAME                           ATTRIBUTE_TYPE
+---------------------------------------- --------------------
+AFFINITY_CARD                            NUMERICAL
+AGE                                      NUMERICAL
+BASEBALL                                 NUMERICAL
+CRICKET                                  NUMERICAL
+GOLF                                     NUMERICAL
+MISC                                     NUMERICAL
+ORA$VECTOR                               VECTOR
+SOCCER                                   NUMERICAL
+TENNIS                                   NUMERICAL
+UNKNOWN                                  NUMERICAL
+YRS_RESIDENCE                            NUMERICAL
+
+11行が選択されました。
+
+SQL>
+SQL> -- Display model details
+SQL> --
+SQL> -- The model details return the SVD decomposition matrices.
+SQL> -- The user can specify the type of matrix. If no matrix type is provided
+SQL> -- all stored matrices are returned.
+SQL> -- The S matrix represents the singular values.
+SQL> -- The V and U matrices represent two new sets of orthonormal bases.
+SQL> -- Usually, V is chosen as the new coordinate system and U represents
+SQL> -- the projection of the data in the new coordinates.
+SQL> column case_id format a10
+SQL> column attribute_name format a30
+SQL> column value format 9999999.99
+SQL>
+SQL> ---- S matrix
+SQL> select feature_id, VALUE FROM DM$VESVD_SH_SAMPLE;
+
+FEATURE_ID       VALUE
+---------- -----------
+         1     1215.14
+         2       61.47
+         3       34.98
+         4       20.92
+         5       16.21
+         6       12.61
+         7        9.94
+         8        6.54
+         9        5.68
+        10        1.72
+
+10行が選択されました。
+
+SQL>
+SQL> ---- V matrix
+SQL> select feature_id, attribute_name, value
+  2  from DM$VVSVD_SH_SAMPLE;
+
+FEATURE_ID ATTRIBUTE_NAME                       VALUE
+---------- ------------------------------ -----------
+         1 AFFINITY_CARD                          .01
+         2 AFFINITY_CARD                          .06
+         3 AFFINITY_CARD                         -.05
+         4 AFFINITY_CARD                          .10
+         5 AFFINITY_CARD                          .92
+         6 AFFINITY_CARD                         -.38
+         7 AFFINITY_CARD                          .03
+         8 AFFINITY_CARD                         -.02
+         9 AFFINITY_CARD                         -.01
+        10 AFFINITY_CARD                          .00
+         1 AGE                                    .99
+         2 AGE                                   -.14
+         3 AGE                                    .00
+         4 AGE                                   -.01
+         5 AGE                                   -.01
+         6 AGE                                   -.02
+         7 AGE                                   -.01
+         8 AGE                                    .01
+         9 AGE                                    .00
+        10 AGE                                    .00
+         1 BASEBALL                               .02
+         2 BASEBALL                               .11
+         3 BASEBALL                               .53
+         4 BASEBALL                               .46
+         5 BASEBALL                              -.04
+         6 BASEBALL                              -.02
+         7 BASEBALL                              -.01
+         8 BASEBALL                               .18
+         9 BASEBALL                              -.68
+        10 BASEBALL                               .00
+         1 CRICKET                                .02
+         2 CRICKET                                .12
+         3 CRICKET                                .53
+         4 CRICKET                                .44
+         5 CRICKET                               -.02
+         6 CRICKET                               -.01
+         7 CRICKET                               -.03
+         8 CRICKET                               -.11
+         9 CRICKET                                .71
+        10 CRICKET                                .01
+         1 GOLF                                   .03
+         2 GOLF                                   .14
+         3 GOLF                                   .32
+         4 GOLF                                  -.32
+         5 GOLF                                   .05
+         6 GOLF                                   .08
+         7 GOLF                                   .24
+         8 GOLF                                  -.82
+         9 GOLF                                  -.18
+        10 GOLF                                  -.01
+         1 MISC                                   .00
+         2 MISC                                  -.00
+         3 MISC                                   .00
+         4 MISC                                  -.01
+         5 MISC                                   .00
+         6 MISC                                   .00
+         7 MISC                                   .01
+         8 MISC                                  -.00
+         9 MISC                                  -.00
+        10 MISC                                  1.00
+         1 SOCCER                                 .03
+         2 SOCCER                                 .15
+         3 SOCCER                                 .30
+         4 SOCCER                                -.39
+         5 SOCCER                                 .34
+         6 SOCCER                                 .66
+         7 SOCCER                                -.33
+         8 SOCCER                                 .28
+         9 SOCCER                                 .03
+        10 SOCCER                                -.00
+         1 TENNIS                                 .02
+         2 TENNIS                                 .00
+         3 TENNIS                                -.15
+         4 TENNIS                                 .22
+         5 TENNIS                                 .14
+         6 TENNIS                                 .47
+         7 TENNIS                                 .82
+         8 TENNIS                                 .14
+         9 TENNIS                                 .04
+        10 TENNIS                                -.00
+         1 UNKNOWN                                .00
+         2 UNKNOWN                                .10
+         3 UNKNOWN                                .39
+         4 UNKNOWN                               -.53
+         5 UNKNOWN                               -.12
+         6 UNKNOWN                               -.44
+         7 UNKNOWN                                .40
+         8 UNKNOWN                                .42
+         9 UNKNOWN                                .09
+        10 UNKNOWN                               -.00
+         1 YRS_RESIDENCE                          .14
+         2 YRS_RESIDENCE                          .95
+         3 YRS_RESIDENCE                         -.26
+         4 YRS_RESIDENCE                          .05
+         5 YRS_RESIDENCE                         -.10
+         6 YRS_RESIDENCE                         -.04
+         7 YRS_RESIDENCE                         -.03
+
+FEATURE_ID ATTRIBUTE_NAME                       VALUE
+---------- ------------------------------ -----------
+         8 YRS_RESIDENCE                          .03
+         9 YRS_RESIDENCE                         -.00
+        10 YRS_RESIDENCE                          .00
+
+100行が選択されました。
+
+SQL>
+SQL> ---- U matrix
+SQL> select feature_id, value
+  2  FROM DM$VUSVD_SH_sample
+  3  WHERE case_id = 101501
+  4  ORDER BY feature_id;
+
+FEATURE_ID       VALUE
+---------- -----------
+         1         .02
+         2         .00
+         3         .02
+         4         .02
+         5        -.01
+         6         .04
+         7         .02
+         8         .00
+         9        -.00
+        10        -.00
+
+10行が選択されました。
+
+SQL>
+SQL> -- To compress the data and reduce storage only a few of the projections
+SQL> -- in the new coordinate system need to be stored.
+SQL> -- In this use case, we  use only the top 5 projections. This results in
+SQL> -- two-fold compression. The SVD projection values can be obtained
+SQL> -- either by invoking the FEATURE_VALUE operator (see previous
+SQL> -- use case) or using the get_model_details_svd U matrix output.
+SQL>
+SQL> -- Here, we compute the average reconstruction error due to compression.
+SQL> -- To facilitate the computation, we first pivot the original data into
+SQL> -- transactional format.
+SQL>
+SQL> -- Make the data transactional
+SQL> CREATE TABLE svd_sh_sample_build_num_piv as
+  2  select * from svd_sh_sample_build_num
+  3    unpivot (value for attribute_name in("AGE", "YRS_RESIDENCE", "AFFINITY_CARD",
+  4    "CRICKET", "BASEBALL", "TENNIS",
+  5    "SOCCER", "GOLF", "UNKNOWN", "MISC"));
+
+Table SVD_SH_SAMPLE_BUILD_NUM_PIVは作成されました。
+
+SQL>
+SQL>
+SQL> -- Compute the average reconstruction error using the top 5 projections
+SQL> -- First compute the data reconstruction as U*S*V' using only the top five
+SQL> -- projections.
+SQL> CREATE TABLE svd_sh_sample_build_num_recon as
+  2  WITH
+  3    s_mat AS (
+  4    SELECT feature_id, value FROM DM$VESVD_SH_SAMPLE
+  5    WHERE feature_id<=5),
+  6    v_mat AS (
+  7    SELECT feature_id, attribute_name, value FROM DM$VVSVD_SH_SAMPLE
+  8    WHERE feature_id<=5),
+  9    u_mat AS (
+ 10    SELECT feature_id, case_id, value FROM DM$VUSVD_SH_SAMPLE
+ 11    WHERE feature_id<=5)
+ 12  SELECT case_id cust_id, attribute_name, sum(c.value*b.VALUE*a.value) value
+ 13    FROM s_mat a, v_mat b, u_mat c
+ 14    WHERE a.feature_id=b.feature_id AND a.feature_id=c.feature_id
+ 15    GROUP BY case_id, attribute_name;
+
+Table SVD_SH_SAMPLE_BUILD_NUM_RECONは作成されました。
+
+SQL>
+SQL> column mae format 9999999.999
+SQL> -- Compute the mean absolute error.
+SQL> SELECT avg(abs(a.value-b.value)) mae
+  2  FROM svd_sh_sample_build_num_recon a, svd_sh_sample_build_num_piv b
+  3  WHERE a.cust_id=b.cust_id AND a.attribute_name=b.attribute_name;
+
+         MAE
+------------
+        .086
+
+1行が選択されました。
+
+SQL>
+SQL> column mape format 9999999.999
+SQL> -- Compute the mean absolute percentage error.
+SQL> SELECT avg(abs((a.value-b.value)/
+  2                  CASE WHEN b.VALUE=0 THEN 1 ELSE b.VALUE END)) mape
+  3  FROM svd_sh_sample_build_num_recon a, svd_sh_sample_build_num_piv b
+  4  WHERE a.cust_id=b.cust_id AND a.attribute_name=b.attribute_name;
+
+        MAPE
+------------
+        .085
+
+1行が選択されました。
+
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --    BUILD and APPLY a transient model using analytic functions
+SQL> -----------------------------------------------------------------------
+SQL> -- In addition to creating a persistent model that is stored as a schema
+SQL> -- object, models can be built and scored on data on the fly using
+SQL> -- Oracle's analytic function syntax.
+SQL>
+SQL> --------------------
+SQL> -- BUSINESS USE CASE
+SQL> --
+SQL> -- Map customer attributes into six features and return the feature
+SQL> -- mapping for customer 100001.
+SQL> -- All data in the apply view is used to construct the feature mappings.
+SQL> -- All necessary data preparation steps are automatically performed.
+SQL> column feature_id format 999
+SQL> column value format 999.999
+SQL> select feature_id, value
+  2  from (
+  3   select cust_id, feature_set(into 6 using *) over () fset
+  4   from mining_data_apply_v),
+  5  table(fset)
+  6  where cust_id = 100001
+  7  order by feature_id;
+
+FEATURE_ID    VALUE
+---------- --------
+         1     .026
+         2     .045
+         3    -.068
+         4     .023
+         5    -.029
+         6     .008
+
+6行が選択されました。
+
+SQL> spool oml4sql-survival-analysis-xgboost

@@ -1,0 +1,578 @@
+SQL> @oml4sql-classification-regression-xgboost
+SQL> -----------------------------------------------------------------------
+SQL> --   Oracle Machine Learning for SQL (OML4SQL) 23ai
+SQL> --
+SQL> --   Classification and Regression - XGBoost Algorithm
+SQL> --
+SQL> --   Copyright (c) 2024 Oracle Corporation and/or its affilitiates.
+SQL> --
+SQL> --  The Universal Permissive License (UPL), Version 1.0
+SQL> --
+SQL> --  https://oss.oracle.com/licenses/upl/
+SQL> -----------------------------------------------------------------------
+SQL> SET ECHO ON
+SQL> SET FEEDBACK 1
+SQL> SET NUMWIDTH 10
+SQL> SET LINESIZE 80
+SQL> SET TRIMSPOOL ON
+SQL> SET TAB OFF
+SQL> SET PAGESIZE 100
+SQL> SET LONG 20000
+SQL> -----------------------------------------------------------------------
+SQL> --                (1) Use XGBoost for classification
+SQL> -----------------------------------------------------------------------
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                            SAMPLE PROBLEM
+SQL> -----------------------------------------------------------------------
+SQL> -- Given demographic and purchase data about a set of customers, predict
+SQL> -- customer's response to an affinity card program using XGboost
+SQL> --
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                            SET UP AND ANALYZE THE DATA
+SQL> -----------------------------------------------------------------------
+SQL>
+SQL> -------
+SQL> -- DATA
+SQL> -------
+SQL> -- The data for this sample is composed from base tables in SH Schema
+SQL> -- (See Sample Schema Documentation) and presented through these views:
+SQL> -- mining_data_build_v (build data)
+SQL> -- mining_data_test_v  (test data)
+SQL> -- (See dmsh.sql for view definitions).
+SQL> --
+SQL>
+SQL> -- Cleanup old model with the same name
+SQL> BEGIN DBMS_DATA_MINING.DROP_MODEL('XGC_SH_MODEL');
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> ---------------------
+SQL> -- CREATE MODEL
+SQL> DECLARE
+  2      v_setlst DBMS_DATA_MINING.SETTING_LIST;
+  3  BEGIN
+  4      -- Populate settings list
+  5      v_setlst('ALGO_NAME')               := 'ALGO_XGBOOST';
+  6      -- for 0/1 target, choose binary:logistic as objective
+  7      v_setlst('objective')          := 'binary:logistic';
+  8      v_setlst('max_depth')          := '3';
+  9      v_setlst('eta')                := '1';
+ 10      -- choose error and auc as eval_metric to evaluate training dataset
+ 11      v_setlst('eval_metric')        := 'error,auc';
+ 12      v_setlst('num_round')          := '10';
+ 13
+ 14      DBMS_DATA_MINING.CREATE_MODEL2(
+ 15          MODEL_NAME          => 'XGC_SH_MODEL',
+ 16          MINING_FUNCTION     => 'CLASSIFICATION',
+ 17          DATA_QUERY          => 'select * from mining_data_build_v',
+ 18          SET_LIST            => v_setlst,
+ 19          CASE_ID_COLUMN_NAME => 'cust_id',
+ 20          TARGET_COLUMN_NAME  => 'affinity_card');
+ 21  END;
+ 22  /
+DECLARE
+*
+行でエラーが発生しました 1:
+ORA-40216: feature not supported
+ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
+ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
+ORA-06512: at line 14
+
+https://docs.oracle.com/error-help/db/ora-40216/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40216/
+https://docs.oracle.com/error-help/db/ora-06512/
+SQL>
+SQL> -------------------------
+SQL> -- DISPLAY MODEL SETTINGS
+SQL> --
+SQL> column setting_name format a30
+SQL> column setting_value format a30
+SQL> SELECT setting_name, setting_value
+  2    FROM user_mining_model_settings
+  3   WHERE model_name = 'XGC_SH_MODEL'
+  4  ORDER BY setting_name;
+行が選択されていません
+SQL>
+SQL> --------------------------
+SQL> -- DISPLAY MODEL SIGNATURE
+SQL> --
+SQL> column attribute_name format a40
+SQL> column attribute_type format a20
+SQL> SELECT attribute_name, attribute_type
+  2    FROM user_mining_model_attributes
+  3   WHERE model_name = 'XGC_SH_MODEL'
+  4  ORDER BY attribute_name;
+行が選択されていません
+SQL>
+SQL> -- Get a list of model views
+SQL> col view_name format a30
+SQL> col view_type format a50
+SQL> SELECT view_name, view_type FROM user_mining_model_views
+  2    WHERE model_name='XGC_SH_MODEL'
+  3    ORDER BY view_name;
+行が選択されていません
+SQL>
+SQL> -- Global statistics
+SQL> column name format a30
+SQL> column numeric_value format 9999990.999
+SQL> column string_value format a20
+SQL> select name, numeric_value, string_value
+  2    from DM$VGXGC_SH_MODEL
+  3    ORDER BY name;
+
+次の開始中にエラーが発生しました : 行 106 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+select name, numeric_value, string_value
+  from DM$VGXGC_SH_MODEL
+  ORDER BY name
+コマンド行 : 107 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VGXGC_SH_MODEL" does not exist
+
+https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
+*Cause:    The specified table or view did not exist, or a synonym
+           pointed to a table or view that did not exist.
+           To find existing user tables and views, query the
+           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
+           privileges may be required to access the table. If an
+           application returned this message, then the table that the
+           application tried to access did not exist in the database, or
+           the application did not have access to it.
+*Action:   Check each of the following
+           - The spelling of the table or view name is correct.
+           - The referenced table or view name does exist.
+           - The synonym points to an existing table or view.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00942/
+SQL>
+SQL> --attribute importance: top 10 important features
+SQL> column attribute_name format a25
+SQL> column attribute_value format a15
+SQL> column gain format 9.999
+SQL> column cover format 9.999
+SQL> column frequency format 9.999
+SQL>
+SQL> select * from(
+  2  select attribute_name, attribute_value, gain, cover, frequency
+  3  from DM$VIXGC_SH_MODEL
+  4  order by gain desc)
+  5  where rownum <= 10;
+
+次の開始中にエラーが発生しました : 行 117 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+select * from(
+select attribute_name, attribute_value, gain, cover, frequency
+from DM$VIXGC_SH_MODEL
+order by gain desc)
+where rownum <= 10
+コマンド行 : 119 列 : 6 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VIXGC_SH_MODEL" does not exist
+
+https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
+*Cause:    The specified table or view did not exist, or a synonym
+           pointed to a table or view that did not exist.
+           To find existing user tables and views, query the
+           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
+           privileges may be required to access the table. If an
+           application returned this message, then the table that the
+           application tried to access did not exist in the database, or
+           the application did not have access to it.
+*Action:   Check each of the following
+           - The spelling of the table or view name is correct.
+           - The referenced table or view name does exist.
+           - The synonym points to an existing table or view.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00942/
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                               TEST THE MODEL
+SQL> -----------------------------------------------------------------------
+SQL> ------------------------------------
+SQL> -- COMPUTE METRICS TO TEST THE MODEL
+SQL> --
+SQL> -- The queries shown below demonstrate the use of new SQL data mining functions
+SQL> -- along with analytic functions to compute the various test metrics.
+SQL> --
+SQL> -- Modelname:             xgc_sh_model
+SQL> -- Target attribute:      affinity_card
+SQL> -- Positive target value: 1
+SQL> -- (Change as appropriate for a different example)
+SQL>
+SQL> -- Compute CONFUSION MATRIX
+SQL> --
+SQL> -- This query demonstates how to generate a confusion matrix using the new
+SQL> -- SQL prediction functions for scoring. The returned columns match the
+SQL> -- schema of the table generated by COMPUTE_CONFUSION_MATRIX procedure.
+SQL> --
+SQL> SELECT affinity_card AS actual_target_value,
+  2         PREDICTION(XGC_SH_MODEL USING *) AS predicted_target_value,
+  3         COUNT(*) AS value
+  4    FROM mining_data_test_v
+  5   GROUP BY affinity_card, PREDICTION(XGC_SH_MODEL USING *)
+  6   ORDER BY 1, 2;
+
+次の開始中にエラーが発生しました : 行 143 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+SELECT affinity_card AS actual_target_value,
+       PREDICTION(XGC_SH_MODEL USING *) AS predicted_target_value,
+       COUNT(*) AS value
+  FROM mining_data_test_v
+ GROUP BY affinity_card, PREDICTION(XGC_SH_MODEL USING *)
+ ORDER BY 1, 2
+コマンド行 : 143 列 : 235 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-40284: model does not exist
+
+https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
+*Cause:    The model entered does not exist.
+*Action:   Check spelling.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40284/
+SQL>
+SQL> -- Compute ACCURACY
+SQL> --
+SQL> column accuracy format 9.99
+SQL>
+SQL> SELECT SUM(correct)/COUNT(*) AS accuracy
+  2    FROM (SELECT DECODE(affinity_card,
+  3                   PREDICTION(XGC_SH_MODEL USING *), 1, 0) AS correct
+  4            FROM mining_data_test_v);
+
+次の開始中にエラーが発生しました : 行 154 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+SELECT SUM(correct)/COUNT(*) AS accuracy
+  FROM (SELECT DECODE(affinity_card,
+                 PREDICTION(XGC_SH_MODEL USING *), 1, 0) AS correct
+          FROM mining_data_test_v)
+コマンド行 : 154 列 : 180 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-40284: model does not exist
+
+https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
+*Cause:    The model entered does not exist.
+*Action:   Check spelling.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40284/
+SQL>
+SQL> -- Compute AUC (Area Under the roc Curve)
+SQL> column auc format 9.99
+SQL> WITH
+  2  pos_prob_and_counts AS (
+  3  SELECT PREDICTION_PROBABILITY(XGC_SH_MODEL, 1 USING *) pos_prob,
+  4         DECODE(affinity_card, 1, 1, 0) pos_cnt
+  5    FROM mining_data_test_v
+  6  ),
+  7  tpf_fpf AS (
+  8  SELECT  pos_cnt,
+  9         SUM(pos_cnt) OVER (ORDER BY pos_prob DESC) /
+ 10           SUM(pos_cnt) OVER () tpf,
+ 11         SUM(1 - pos_cnt) OVER (ORDER BY pos_prob DESC) /
+ 12           SUM(1 - pos_cnt) OVER () fpf
+ 13    FROM pos_prob_and_counts
+ 14  ),
+ 15  trapezoid_areas AS (
+ 16  SELECT 0.5 * (fpf - LAG(fpf, 1, 0) OVER (ORDER BY fpf, tpf)) *
+ 17          (tpf + LAG(tpf, 1, 0) OVER (ORDER BY fpf, tpf)) area
+ 18    FROM tpf_fpf
+ 19   WHERE pos_cnt = 1
+ 20      OR (tpf = 1 AND fpf = 1)
+ 21  )
+ 22  SELECT SUM(area) auc
+ 23    FROM trapezoid_areas;
+
+次の開始中にエラーが発生しました : 行 161 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+WITH
+pos_prob_and_counts AS (
+SELECT PREDICTION_PROBABILITY(XGC_SH_MODEL, 1 USING *) pos_prob,
+       DECODE(affinity_card, 1, 1, 0) pos_cnt
+  FROM mining_data_test_v
+),
+tpf_fpf AS (
+SELECT  pos_cnt,
+       SUM(pos_cnt) OVER (ORDER BY pos_prob DESC) /
+         SUM(pos_cnt) OVER () tpf,
+       SUM(1 - pos_cnt) OVER (ORDER BY pos_prob DESC) /
+         SUM(1 - pos_cnt) OVER () fpf
+  FROM pos_prob_and_counts
+),
+trapezoid_areas AS (
+SELECT 0.5 * (fpf - LAG(fpf, 1, 0) OVER (ORDER BY fpf, tpf)) *
+        (tpf + LAG(tpf, 1, 0) OVER (ORDER BY fpf, tpf)) area
+  FROM tpf_fpf
+ WHERE pos_cnt = 1
+    OR (tpf = 1 AND fpf = 1)
+)
+SELECT SUM(area) auc
+  FROM trapezoid_areas
+コマンド行 : 171 列 : 15 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-40284: model does not exist
+
+https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
+*Cause:    The model entered does not exist.
+*Action:   Check spelling.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40284/
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                (2) Use XGBoost for regression
+SQL> -----------------------------------------------------------------------
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                            SAMPLE PROBLEM
+SQL> -----------------------------------------------------------------------
+SQL> -- Given demographic and purchase data about a set of customers, predict
+SQL> -- customer's response to an affinity card program using XGboost
+SQL> --
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                            SET UP AND ANALYZE THE DATA
+SQL> -----------------------------------------------------------------------
+SQL>
+SQL> -------
+SQL> -- DATA
+SQL> -------
+SQL> -- The data for this sample is composed from base tables in SH Schema
+SQL> -- (See Sample Schema Documentation) and presented through these views:
+SQL> -- mining_data_build_v (build data)
+SQL> -- mining_data_test_v  (test data)
+SQL> -- (See dmsh.sql for view definitions).
+SQL> --
+SQL> -----------------------------------------------------------------------
+SQL>
+SQL> -- Cleanup old model with the same name
+SQL> BEGIN DBMS_DATA_MINING.DROP_MODEL('XGR_SH_MODEL');
+  2  EXCEPTION WHEN OTHERS THEN NULL; END;
+  3  /
+
+PL/SQLプロシージャが正常に完了しました。
+
+SQL>
+SQL> ---------------------
+SQL> -- CREATE MODEL
+SQL> DECLARE
+  2      v_setlst DBMS_DATA_MINING.SETTING_LIST;
+  3  BEGIN
+  4      -- Populate settings list
+  5      v_setlst('ALGO_NAME')               := 'ALGO_XGBOOST';
+  6      v_setlst('booster')            := 'gblinear';
+  7      v_setlst('alpha')              := '0.0001';
+  8      v_setlst('lambda')             := '1';
+  9      v_setlst('num_round')          := '100';
+ 10
+ 11      DBMS_DATA_MINING.CREATE_MODEL2(
+ 12          MODEL_NAME          => 'XGR_SH_MODEL',
+ 13          MINING_FUNCTION     => 'REGRESSION',
+ 14          DATA_QUERY          => 'select * from mining_data_build_v',
+ 15          SET_LIST            => v_setlst,
+ 16          CASE_ID_COLUMN_NAME => 'cust_id',
+ 17          TARGET_COLUMN_NAME  => 'age');
+ 18  END;
+ 19  /
+DECLARE
+*
+行でエラーが発生しました 1:
+ORA-40216: feature not supported
+ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
+ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
+ORA-06512: at line 11
+
+https://docs.oracle.com/error-help/db/ora-40216/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40216/
+https://docs.oracle.com/error-help/db/ora-06512/
+SQL>
+SQL> -------------------------
+SQL> -- DISPLAY MODEL SETTINGS
+SQL> --
+SQL> column setting_name format a30
+SQL> column setting_value format a30
+SQL> SELECT setting_name, setting_value
+  2    FROM user_mining_model_settings
+  3   WHERE model_name = 'XGR_SH_MODEL'
+  4  ORDER BY setting_name;
+行が選択されていません
+SQL>
+SQL> --------------------------
+SQL> -- DISPLAY MODEL SIGNATURE
+SQL> --
+SQL> column attribute_name format a40
+SQL> column attribute_type format a20
+SQL> SELECT attribute_name, attribute_type
+  2    FROM user_mining_model_attributes
+  3   WHERE model_name = 'XGR_SH_MODEL'
+  4  ORDER BY attribute_name;
+行が選択されていません
+SQL>
+SQL> -- Get a list of model views
+SQL> col view_name format a30
+SQL> col view_type format a50
+SQL> SELECT view_name, view_type FROM user_mining_model_views
+  2    WHERE model_name='XGR_SH_MODEL'
+  3    ORDER BY view_name;
+行が選択されていません
+SQL>
+SQL> -- Global statistics
+SQL> column name format a30
+SQL> column numeric_value format 9999990.999
+SQL> column string_value format a20
+SQL> select name, numeric_value, string_value
+  2    from DM$VGXGR_SH_MODEL
+  3    ORDER BY name;
+
+次の開始中にエラーが発生しました : 行 269 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+select name, numeric_value, string_value
+  from DM$VGXGR_SH_MODEL
+  ORDER BY name
+コマンド行 : 270 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VGXGR_SH_MODEL" does not exist
+
+https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
+*Cause:    The specified table or view did not exist, or a synonym
+           pointed to a table or view that did not exist.
+           To find existing user tables and views, query the
+           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
+           privileges may be required to access the table. If an
+           application returned this message, then the table that the
+           application tried to access did not exist in the database, or
+           the application did not have access to it.
+*Action:   Check each of the following
+           - The spelling of the table or view name is correct.
+           - The referenced table or view name does exist.
+           - The synonym points to an existing table or view.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00942/
+SQL>
+SQL> -- attribute importance
+SQL> -- show top 5
+SQL> column ATTRIBUTE_NAME format a25
+SQL> column ATTRIBUTE_VALUE format a15
+SQL> column weight format 9.999
+SQL> select * from(
+  2  select attribute_name, attribute_value, weight
+  3  from DM$VIXGR_SH_MODEL
+  4  order by abs(weight) desc)
+  5  where rownum <= 5;
+
+次の開始中にエラーが発生しました : 行 278 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+select * from(
+select attribute_name, attribute_value, weight
+from DM$VIXGR_SH_MODEL
+order by abs(weight) desc)
+where rownum <= 5
+コマンド行 : 280 列 : 6 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VIXGR_SH_MODEL" does not exist
+
+https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
+*Cause:    The specified table or view did not exist, or a synonym
+           pointed to a table or view that did not exist.
+           To find existing user tables and views, query the
+           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
+           privileges may be required to access the table. If an
+           application returned this message, then the table that the
+           application tried to access did not exist in the database, or
+           the application did not have access to it.
+*Action:   Check each of the following
+           - The spelling of the table or view name is correct.
+           - The referenced table or view name does exist.
+           - The synonym points to an existing table or view.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00942/
+SQL>
+SQL> -----------------------------------------------------------------------
+SQL> --                               TEST THE MODEL
+SQL> -----------------------------------------------------------------------
+SQL> ------------------------------------
+SQL> -- COMPUTE METRICS TO TEST THE MODEL
+SQL> --
+SQL> -- The queries shown below demonstrate the use of new SQL data mining functions
+SQL> -- along with analytic functions to compute the various test metrics.
+SQL> --
+SQL> -- Modelname:             xgr_sh_model
+SQL> -- Target attribute:      age
+SQL>
+SQL> ------------------------------------
+SQL> -- COMPUTE METRICS TO TEST THE MODEL
+SQL> --
+SQL>
+SQL> -- 1. Root Mean Square Error - Sqrt(Mean((x - x')^2))
+SQL> -- 2. Mean Absolute Error - Mean(|(x - x')|)
+SQL> --
+SQL> column rmse format 9999.9
+SQL> column mae format 9999.9
+SQL> SELECT SQRT(AVG((A.pred - B.age) * (A.pred - B.age))) rmse,
+  2         AVG(ABS(a.pred - B.age)) mae
+  3    FROM (SELECT cust_id, prediction(XGR_SH_MODEL using *) pred
+  4            FROM mining_data_test_v) A,
+  5         mining_data_test_v B
+  6    WHERE A.cust_id = B.cust_id;
+
+次の開始中にエラーが発生しました : 行 305 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+SELECT SQRT(AVG((A.pred - B.age) * (A.pred - B.age))) rmse,
+       AVG(ABS(a.pred - B.age)) mae
+  FROM (SELECT cust_id, prediction(XGR_SH_MODEL using *) pred
+          FROM mining_data_test_v) A,
+       mining_data_test_v B
+  WHERE A.cust_id = B.cust_id
+コマンド行 : 305 列 : 253 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-40284: model does not exist
+
+https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
+*Cause:    The model entered does not exist.
+*Action:   Check spelling.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40284/
+SQL>
+SQL> --- prediction
+SQL> SELECT CUST_ID, age,
+  2         PREDICTION(XGR_SH_MODEL USING *) pred,
+  3         PREDICTION_DETAILS(XGR_SH_MODEL USING *) det
+  4    FROM mining_data_apply_v
+  5   WHERE CUST_ID < 100010
+  6   ORDER BY CUST_ID;
+
+次の開始中にエラーが発生しました : 行 313 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
+コマンド -
+SELECT CUST_ID, age,
+       PREDICTION(XGR_SH_MODEL USING *) pred,
+       PREDICTION_DETAILS(XGR_SH_MODEL USING *) det
+  FROM mining_data_apply_v
+ WHERE CUST_ID < 100010
+ ORDER BY CUST_ID
+コマンド行 : 313 列 : 187 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
+エラー・レポート -
+SQLエラー: ORA-40284: model does not exist
+
+https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
+*Cause:    The model entered does not exist.
+*Action:   Check spelling.
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-40284/
+SQL> spool oml4sql-classification-svm
