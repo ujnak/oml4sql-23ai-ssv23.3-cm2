@@ -43,7 +43,6 @@ col x2 format 990.99999
 -- Perform Time Series Regression using a combination of ESM and GLM algorithms.
 -- See documentation on "Multiple Time Seriess Models" at 
 -- https://docs.oracle.com/en/database/oracle/machine-learning/oml4sql/23/dmcon/exponential-smoothing.html
-​
 -----------------------------------------------------------------------
 --                            EXAMPLE IN THIS SCRIPT
 -----------------------------------------------------------------------
@@ -53,12 +52,11 @@ col x2 format 990.99999
 -- Explore the model views
 -- Compare the regression forecast to the baseline (ESM) forecast
 -- Build an XGBOOST model and compare to ESM forecast
-​
 -----------------------------------------------------------------------
 -- Create Time Series Dataset-- Invoke this script 
 --
 
-@time-series-regression-dataset.sql
+@oml4sql-time-series-regression-dataset.sql
 /
 -----------------------------------------------------------------------
 --                            BUILD THE MODEL
@@ -114,14 +112,12 @@ FETCH FIRST 10 ROWS ONLY;
 -- DM models show the forcast for the target column
 --
 
-BEGIN DROP TABLE tmesm_ms_train;
-EXCEPTION WHEN OTHERS THEN NULL; END;
-/
+DROP TABLE IF EXISTS tmesm_ms_train;
 CREATE TABLE tmesm_ms_train as
 SELECT CASE_ID, DAX, DM$DAX, DM$SMI, DM$CAC, DM$FTSE, 
        CASE WHEN case_id < to_date('1998-02-03','YYYY-MM-DD') 
        THEN 0 ELSE 1 END AS prod 
-FROM DM$VRMSDEMO_Model order by 1;
+FROM DM$VRMSDEMO_Model order by 1
 /
 -------------------------
 -- By inserting the actual values into the prediction dataset, 
@@ -129,20 +125,17 @@ FROM DM$VRMSDEMO_Model order by 1;
 -- models can be possible.
 --
 
-BEGIN EXECUTE IMMEDIATE 'DROP TABLE tmesm_ms_actual';
-EXCEPTION WHEN OTHERS THEN NULL; END; 
-/
+DROP TABLE IF EXISTS tmesm_ms_actual;
 CREATE TABLE tmesm_ms_actual (case_id DATE, DAX binary_double);
 INSERT INTO tmesm_ms_actual VALUES(DATE '1998-02-04', 4633.008);
 commit;
 /
-BEGIN EXECUTE IMMEDIATE 'DROP TABLE tmesm_ms_test';
-EXCEPTION WHEN OTHERS THEN NULL; END;
-/
+
+DROP TABLE IF EXISTS tmesm_ms_test;
 CREATE TABLE tmesm_ms_test as 
 SELECT a.case_id, b.DAX, DM$DAX, DM$SMI, DM$CAC, DM$FTSE, 1 prod 
 FROM   DM$VTMSDEMO_model a, tmesm_ms_actual b
-WHERE  a.case_id=b.case_id;
+WHERE  a.case_id=b.case_id
 /
 -------------------------
 -- Column 'prod' is a binary variable indicating a change in the environment,

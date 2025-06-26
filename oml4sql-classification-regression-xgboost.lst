@@ -75,20 +75,9 @@ SQL> DECLARE
  20          TARGET_COLUMN_NAME  => 'affinity_card');
  21  END;
  22  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 14
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -------------------------
 SQL> -- DISPLAY MODEL SETTINGS
@@ -99,7 +88,25 @@ SQL> SELECT setting_name, setting_value
   2    FROM user_mining_model_settings
   3   WHERE model_name = 'XGC_SH_MODEL'
   4  ORDER BY setting_name;
-行が選択されていません
+
+SETTING_NAME                    SETTING_VALUE
+_______________________________ __________________________
+ALGO_NAME                       ALGO_XGBOOST
+CLAS_WEIGHTS_BALANCED           OFF
+ODMS_DETAILS                    ODMS_ENABLE
+ODMS_MISSING_VALUE_TREATMENT    ODMS_MISSING_VALUE_AUTO
+ODMS_SAMPLING                   ODMS_SAMPLING_DISABLE
+PREP_AUTO                       ON
+booster                         gbtree
+eta                             1
+eval_metric                     error,auc
+max_depth                       3
+ntree_limit                     0
+num_round                       10
+objective                       binary:logistic
+
+13行が選択されました。
+
 SQL>
 SQL> --------------------------
 SQL> -- DISPLAY MODEL SIGNATURE
@@ -110,7 +117,29 @@ SQL> SELECT attribute_name, attribute_type
   2    FROM user_mining_model_attributes
   3   WHERE model_name = 'XGC_SH_MODEL'
   4  ORDER BY attribute_name;
-行が選択されていません
+
+ATTRIBUTE_NAME         ATTRIBUTE_TYPE
+______________________ _________________
+AFFINITY_CARD          CATEGORICAL
+AGE                    NUMERICAL
+BASEBALL               NUMERICAL
+COUNTRY_NAME           CATEGORICAL
+CRICKET                NUMERICAL
+CUST_GENDER            CATEGORICAL
+CUST_INCOME_LEVEL      CATEGORICAL
+CUST_MARITAL_STATUS    CATEGORICAL
+EDUCATION              CATEGORICAL
+GOLF                   NUMERICAL
+HOUSEHOLD_SIZE         CATEGORICAL
+MISC                   NUMERICAL
+OCCUPATION             CATEGORICAL
+SOCCER                 NUMERICAL
+TENNIS                 NUMERICAL
+UNKNOWN                NUMERICAL
+YRS_RESIDENCE          NUMERICAL
+
+17行が選択されました。
+
 SQL>
 SQL> -- Get a list of model views
 SQL> col view_name format a30
@@ -118,7 +147,18 @@ SQL> col view_type format a50
 SQL> SELECT view_name, view_type FROM user_mining_model_views
   2    WHERE model_name='XGC_SH_MODEL'
   3    ORDER BY view_name;
-行が選択されていません
+
+VIEW_NAME            VIEW_TYPE
+____________________ _______________________________
+DM$VCXGC_SH_MODEL    Scoring Cost Matrix
+DM$VGXGC_SH_MODEL    Global Name-Value Pairs
+DM$VIXGC_SH_MODEL    XGBoost Attribute Importance
+DM$VSXGC_SH_MODEL    Computed Settings
+DM$VTXGC_SH_MODEL    Classification Targets
+DM$VWXGC_SH_MODEL    Model Build Alerts
+
+6行が選択されました。
+
 SQL>
 SQL> -- Global statistics
 SQL> column name format a30
@@ -128,31 +168,14 @@ SQL> select name, numeric_value, string_value
   2    from DM$VGXGC_SH_MODEL
   3    ORDER BY name;
 
-次の開始中にエラーが発生しました : 行 106 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-select name, numeric_value, string_value
-  from DM$VGXGC_SH_MODEL
-  ORDER BY name
-コマンド行 : 107 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VGXGC_SH_MODEL" does not exist
+NAME                 NUMERIC_VALUE STRING_VALUE
+___________ ______________________ _______________
+NUM_ROWS                      1500
+auc            0.91229793233082712
+error          0.14266666666666666
 
-https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
-*Cause:    The specified table or view did not exist, or a synonym
-           pointed to a table or view that did not exist.
-           To find existing user tables and views, query the
-           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
-           privileges may be required to access the table. If an
-           application returned this message, then the table that the
-           application tried to access did not exist in the database, or
-           the application did not have access to it.
-*Action:   Check each of the following
-           - The spelling of the table or view name is correct.
-           - The referenced table or view name does exist.
-           - The synonym points to an existing table or view.
+3行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-00942/
 SQL>
 SQL> --attribute importance: top 10 important features
 SQL> column attribute_name format a25
@@ -167,33 +190,21 @@ SQL> select * from(
   4  order by gain desc)
   5  where rownum <= 10;
 
-次の開始中にエラーが発生しました : 行 117 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-select * from(
-select attribute_name, attribute_value, gain, cover, frequency
-from DM$VIXGC_SH_MODEL
-order by gain desc)
-where rownum <= 10
-コマンド行 : 119 列 : 6 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VIXGC_SH_MODEL" does not exist
+ATTRIBUTE_NAME         ATTRIBUTE_VALUE    GAIN                    COVER                   FREQUENCY
+______________________ __________________ _______________________ _______________________ ______________________
+YRS_RESIDENCE                             0.295891911631358       0.14110639103631908     0.16393442622950818
+HOUSEHOLD_SIZE         2                  0.11959413629490297     0.028079444362176995    0.01639344262295082
+HOUSEHOLD_SIZE         9+                 0.10455005000024829     0.05086361186745202     0.03278688524590164
+AGE                                       0.06964381535119997     0.11676808476286682     0.2459016393442623
+EDUCATION              Bach.              0.05614486730959843     0.04488221179899051     0.03278688524590164
+SOCCER                                    0.050282572973818884    0.042761188038704497    0.03278688524590164
+CUST_MARITAL_STATUS    never married      0.043547483644162624    0.07550761455231149     0.04918032786885246
+EDUCATION              Masters            0.042762082642845096    0.04012394864936998     0.03278688524590164
+EDUCATION              Profsc             0.035528163711948606    0.028977100171476998    0.01639344262295082
+HOUSEHOLD_SIZE         1                  0.035024442784187676    0.03629288017365242     0.01639344262295082
 
-https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
-*Cause:    The specified table or view did not exist, or a synonym
-           pointed to a table or view that did not exist.
-           To find existing user tables and views, query the
-           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
-           privileges may be required to access the table. If an
-           application returned this message, then the table that the
-           application tried to access did not exist in the database, or
-           the application did not have access to it.
-*Action:   Check each of the following
-           - The spelling of the table or view name is correct.
-           - The referenced table or view name does exist.
-           - The synonym points to an existing table or view.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-00942/
 SQL>
 SQL> -----------------------------------------------------------------------
 SQL> --                               TEST THE MODEL
@@ -222,24 +233,15 @@ SQL> SELECT affinity_card AS actual_target_value,
   5   GROUP BY affinity_card, PREDICTION(XGC_SH_MODEL USING *)
   6   ORDER BY 1, 2;
 
-次の開始中にエラーが発生しました : 行 143 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-SELECT affinity_card AS actual_target_value,
-       PREDICTION(XGC_SH_MODEL USING *) AS predicted_target_value,
-       COUNT(*) AS value
-  FROM mining_data_test_v
- GROUP BY affinity_card, PREDICTION(XGC_SH_MODEL USING *)
- ORDER BY 1, 2
-コマンド行 : 143 列 : 235 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   ACTUAL_TARGET_VALUE    PREDICTED_TARGET_VALUE    VALUE
+______________________ _________________________ ________
+                     0                         0     1032
+                     0                         1      122
+                     1                         0      142
+                     1                         1      204
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+4行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -- Compute ACCURACY
 SQL> --
@@ -250,22 +252,12 @@ SQL> SELECT SUM(correct)/COUNT(*) AS accuracy
   3                   PREDICTION(XGC_SH_MODEL USING *), 1, 0) AS correct
   4            FROM mining_data_test_v);
 
-次の開始中にエラーが発生しました : 行 154 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-SELECT SUM(correct)/COUNT(*) AS accuracy
-  FROM (SELECT DECODE(affinity_card,
-                 PREDICTION(XGC_SH_MODEL USING *), 1, 0) AS correct
-          FROM mining_data_test_v)
-コマンド行 : 154 列 : 180 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   ACCURACY
+___________
+      0.824
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+1行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -- Compute AUC (Area Under the roc Curve)
 SQL> column auc format 9.99
@@ -293,41 +285,12 @@ SQL> WITH
  22  SELECT SUM(area) auc
  23    FROM trapezoid_areas;
 
-次の開始中にエラーが発生しました : 行 161 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-WITH
-pos_prob_and_counts AS (
-SELECT PREDICTION_PROBABILITY(XGC_SH_MODEL, 1 USING *) pos_prob,
-       DECODE(affinity_card, 1, 1, 0) pos_cnt
-  FROM mining_data_test_v
-),
-tpf_fpf AS (
-SELECT  pos_cnt,
-       SUM(pos_cnt) OVER (ORDER BY pos_prob DESC) /
-         SUM(pos_cnt) OVER () tpf,
-       SUM(1 - pos_cnt) OVER (ORDER BY pos_prob DESC) /
-         SUM(1 - pos_cnt) OVER () fpf
-  FROM pos_prob_and_counts
-),
-trapezoid_areas AS (
-SELECT 0.5 * (fpf - LAG(fpf, 1, 0) OVER (ORDER BY fpf, tpf)) *
-        (tpf + LAG(tpf, 1, 0) OVER (ORDER BY fpf, tpf)) area
-  FROM tpf_fpf
- WHERE pos_cnt = 1
-    OR (tpf = 1 AND fpf = 1)
-)
-SELECT SUM(area) auc
-  FROM trapezoid_areas
-コマンド行 : 171 列 : 15 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+                                          AUC
+_____________________________________________
+   0.8634956572264353192214063173079812865024
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+1行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------
 SQL> --                (2) Use XGBoost for regression
@@ -384,20 +347,9 @@ SQL> DECLARE
  17          TARGET_COLUMN_NAME  => 'age');
  18  END;
  19  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 11
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -------------------------
 SQL> -- DISPLAY MODEL SETTINGS
@@ -408,7 +360,22 @@ SQL> SELECT setting_name, setting_value
   2    FROM user_mining_model_settings
   3   WHERE model_name = 'XGR_SH_MODEL'
   4  ORDER BY setting_name;
-行が選択されていません
+
+SETTING_NAME                    SETTING_VALUE
+_______________________________ __________________________
+ALGO_NAME                       ALGO_XGBOOST
+ODMS_DETAILS                    ODMS_ENABLE
+ODMS_MISSING_VALUE_TREATMENT    ODMS_MISSING_VALUE_AUTO
+ODMS_SAMPLING                   ODMS_SAMPLING_DISABLE
+PREP_AUTO                       ON
+alpha                           0.0001
+booster                         gblinear
+lambda                          1
+ntree_limit                     0
+num_round                       100
+
+10行が選択されました。
+
 SQL>
 SQL> --------------------------
 SQL> -- DISPLAY MODEL SIGNATURE
@@ -419,7 +386,29 @@ SQL> SELECT attribute_name, attribute_type
   2    FROM user_mining_model_attributes
   3   WHERE model_name = 'XGR_SH_MODEL'
   4  ORDER BY attribute_name;
-行が選択されていません
+
+ATTRIBUTE_NAME         ATTRIBUTE_TYPE
+______________________ _________________
+AFFINITY_CARD          NUMERICAL
+AGE                    NUMERICAL
+BASEBALL               NUMERICAL
+COUNTRY_NAME           CATEGORICAL
+CRICKET                NUMERICAL
+CUST_GENDER            CATEGORICAL
+CUST_INCOME_LEVEL      CATEGORICAL
+CUST_MARITAL_STATUS    CATEGORICAL
+EDUCATION              CATEGORICAL
+GOLF                   NUMERICAL
+HOUSEHOLD_SIZE         CATEGORICAL
+MISC                   NUMERICAL
+OCCUPATION             CATEGORICAL
+SOCCER                 NUMERICAL
+TENNIS                 NUMERICAL
+UNKNOWN                NUMERICAL
+YRS_RESIDENCE          NUMERICAL
+
+17行が選択されました。
+
 SQL>
 SQL> -- Get a list of model views
 SQL> col view_name format a30
@@ -427,7 +416,16 @@ SQL> col view_type format a50
 SQL> SELECT view_name, view_type FROM user_mining_model_views
   2    WHERE model_name='XGR_SH_MODEL'
   3    ORDER BY view_name;
-行が選択されていません
+
+VIEW_NAME            VIEW_TYPE
+____________________ _______________________________
+DM$VGXGR_SH_MODEL    Global Name-Value Pairs
+DM$VIXGR_SH_MODEL    XGBoost Attribute Importance
+DM$VSXGR_SH_MODEL    Computed Settings
+DM$VWXGR_SH_MODEL    Model Build Alerts
+
+4行が選択されました。
+
 SQL>
 SQL> -- Global statistics
 SQL> column name format a30
@@ -437,36 +435,18 @@ SQL> select name, numeric_value, string_value
   2    from DM$VGXGR_SH_MODEL
   3    ORDER BY name;
 
-次の開始中にエラーが発生しました : 行 269 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-select name, numeric_value, string_value
-  from DM$VGXGR_SH_MODEL
-  ORDER BY name
-コマンド行 : 270 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VGXGR_SH_MODEL" does not exist
+NAME                NUMERIC_VALUE STRING_VALUE
+___________ _____________________ _______________
+NUM_ROWS                     1500
+rmse           9.1255515380867305
 
-https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
-*Cause:    The specified table or view did not exist, or a synonym
-           pointed to a table or view that did not exist.
-           To find existing user tables and views, query the
-           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
-           privileges may be required to access the table. If an
-           application returned this message, then the table that the
-           application tried to access did not exist in the database, or
-           the application did not have access to it.
-*Action:   Check each of the following
-           - The spelling of the table or view name is correct.
-           - The referenced table or view name does exist.
-           - The synonym points to an existing table or view.
+2行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-00942/
 SQL>
 SQL> -- attribute importance
 SQL> -- show top 5
-SQL> column ATTRIBUTE_NAME format a25
-SQL> column ATTRIBUTE_VALUE format a15
+SQL> column ATTRIBUTE_NAME format a25;
+SQL> column ATTRIBUTE_VALUE format a15;
 SQL> column weight format 9.999
 SQL> select * from(
   2  select attribute_name, attribute_value, weight
@@ -474,33 +454,16 @@ SQL> select * from(
   4  order by abs(weight) desc)
   5  where rownum <= 5;
 
-次の開始中にエラーが発生しました : 行 278 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-select * from(
-select attribute_name, attribute_value, weight
-from DM$VIXGR_SH_MODEL
-order by abs(weight) desc)
-where rownum <= 5
-コマンド行 : 280 列 : 6 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-00942: table or view "WKSP_APEXDEV"."DM$VIXGR_SH_MODEL" does not exist
+ATTRIBUTE_NAME         ATTRIBUTE_VALUE    WEIGHT
+______________________ __________________ ____________
+YRS_RESIDENCE                             3.09882
+TENNIS                                    2.33405
+UNKNOWN                                   -1.80933
+CUST_MARITAL_STATUS    never married      -1.13513
+HOUSEHOLD_SIZE         1                  -0.698904
 
-https://docs.oracle.com/error-help/db/ora-00942/00942. 00000 -  "table or view%s does not exist"
-*Cause:    The specified table or view did not exist, or a synonym
-           pointed to a table or view that did not exist.
-           To find existing user tables and views, query the
-           ALL_TABLES and ALL_VIEWS data dictionary views. Certain
-           privileges may be required to access the table. If an
-           application returned this message, then the table that the
-           application tried to access did not exist in the database, or
-           the application did not have access to it.
-*Action:   Check each of the following
-           - The spelling of the table or view name is correct.
-           - The referenced table or view name does exist.
-           - The synonym points to an existing table or view.
+5行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-00942/
 SQL>
 SQL> -----------------------------------------------------------------------
 SQL> --                               TEST THE MODEL
@@ -530,24 +493,12 @@ SQL> SELECT SQRT(AVG((A.pred - B.age) * (A.pred - B.age))) rmse,
   5         mining_data_test_v B
   6    WHERE A.cust_id = B.cust_id;
 
-次の開始中にエラーが発生しました : 行 305 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-SELECT SQRT(AVG((A.pred - B.age) * (A.pred - B.age))) rmse,
-       AVG(ABS(a.pred - B.age)) mae
-  FROM (SELECT cust_id, prediction(XGR_SH_MODEL using *) pred
-          FROM mining_data_test_v) A,
-       mining_data_test_v B
-  WHERE A.cust_id = B.cust_id
-コマンド行 : 305 列 : 253 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+                                       RMSE                                         MAE
+___________________________________________ ___________________________________________
+   8.87772579680907078090402433964750568746    6.46822799873352050533333333333333333333
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+1行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> --- prediction
 SQL> SELECT CUST_ID, age,
@@ -557,22 +508,81 @@ SQL> SELECT CUST_ID, age,
   5   WHERE CUST_ID < 100010
   6   ORDER BY CUST_ID;
 
-次の開始中にエラーが発生しました : 行 313 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql
-コマンド -
-SELECT CUST_ID, age,
-       PREDICTION(XGR_SH_MODEL USING *) pred,
-       PREDICTION_DETAILS(XGR_SH_MODEL USING *) det
-  FROM mining_data_apply_v
- WHERE CUST_ID < 100010
- ORDER BY CUST_ID
-コマンド行 : 313 列 : 187 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-classification-regression-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   CUST_ID    AGE                  PRED DET
+__________ ______ _____________________ _______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+    100001     51    27.138010025024414 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="3" weight=".726" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".182" rank="2"/>
+<Attribute name="CUST_MARITAL_STATUS" actualValue="widowed" weight=".034" rank="3"/>
+<Attribute name="CUST_GENDER" actualValue="F" weight=".01" rank="4"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".007" rank="5"/>
+</Details>
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+    100002     30    28.128942489624023 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="4" weight=".73" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".137" rank="2"/>
+<Attribute name="CUST_GENDER" actualValue="F" weight=".008" rank="3"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".005" rank="4"/>
+<Attribute name="GOLF" actualValue="1" weight="0" rank="5"/>
+</Details>
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
-SQL> spool oml4sql-classification-svm
+    100003     23    31.685884475708008 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="6" weight=".89" rank="1"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".004" rank="2"/>
+<Attribute name="GOLF" actualValue="1" weight="0" rank="3"/>
+<Attribute name="OCCUPATION" actualValue="Sales" weight="-.003" rank="4"/>
+<Attribute name="CUST_INCOME_LEVEL" actualValue="K: 250,000 - 299,999" weight="-.007" rank="5"/>
+</Details>
+
+    100004     39    32.286205291748047 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="5" weight=".806" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".121" rank="2"/>
+<Attribute name="CUST_GENDER" actualValue="F" weight=".007" rank="3"/>
+<Attribute name="CUST_MARITAL_STATUS" actualValue="divorced" weight=".005" rank="4"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".004" rank="5"/>
+</Details>
+
+    100005     35    33.178863525390625 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="5" weight=".847" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".128" rank="2"/>
+<Attribute name="AFFINITY_CARD" actualValue="1" weight=".011" rank="3"/>
+<Attribute name="EDUCATION" actualValue="Assoc-A" weight=".003" rank="4"/>
+<Attribute name="OCCUPATION" actualValue="Crafts" weight=".002" rank="5"/>
+</Details>
+
+    100006      9    18.381069183349609 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="2" weight=".62" rank="1"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="9+" weight=".018" rank="2"/>
+<Attribute name="CUST_GENDER" actualValue="F" weight=".013" rank="3"/>
+<Attribute name="CUST_INCOME_LEVEL" actualValue="G: 130,000 - 149,999" weight=".007" rank="4"/>
+<Attribute name="GOLF" actualValue="1" weight="0" rank="5"/>
+</Details>
+
+    100007     29    32.538482666015625 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="5" weight=".817" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".123" rank="2"/>
+<Attribute name="CUST_GENDER" actualValue="F" weight=".007" rank="3"/>
+<Attribute name="CUST_MARITAL_STATUS" actualValue="divorced" weight=".005" rank="4"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".004" rank="5"/>
+</Details>
+
+    100008     30    31.139764785766602 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="5" weight=".776" rank="1"/>
+<Attribute name="TENNIS" actualValue="1" weight=".117" rank="2"/>
+<Attribute name="HOUSEHOLD_SIZE" actualValue="2" weight=".004" rank="3"/>
+<Attribute name="OCCUPATION" actualValue="Crafts" weight=".001" rank="4"/>
+<Attribute name="GOLF" actualValue="1" weight="0" rank="5"/>
+</Details>
+
+    100009     18    22.692821502685547 <Details algorithm="XGboost">
+<Attribute name="YRS_RESIDENCE" actualValue="3" weight=".796" rank="1"/>
+<Attribute name="AFFINITY_CARD" actualValue="1" weight=".018" rank="2"/>
+<Attribute name="CUST_INCOME_LEVEL" actualValue="G: 130,000 - 149,999" weight=".006" rank="3"/>
+<Attribute name="GOLF" actualValue="1" weight="0" rank="4"/>
+<Attribute name="OCCUPATION" actualValue="Prof." weight="-.003" rank="5"/>
+</Details>
+
+
+9行が選択されました。
+
+SQL> spool oml4sql-survival-analysis-xgboost

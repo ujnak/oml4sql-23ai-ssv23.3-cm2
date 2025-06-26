@@ -183,20 +183,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -212,21 +201,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  FROM   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 157 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-FROM   SURVIVAL_DATA
-コマンド行 : 159 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND        PRED
+_________ _________ ___________
+      235              2256.184
+      444       444     485.286
+      806              4322.943
+      551              3467.912
+      202              3100.726
+      583       583     588.618
+      135       135     157.796
+      237              2415.861
+      356              2833.561
+      387       387     365.453
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --              Nest data into numerical values
@@ -283,20 +272,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -312,21 +290,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  FROM   SURVIVAL_NUMERIC;
 
-次の開始中にエラーが発生しました : 行 221 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-FROM   SURVIVAL_NUMERIC
-コマンド行 : 222 列 : 46 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND        PRED
+_________ _________ ___________
+      235              2256.184
+      444       444     485.286
+      806              4322.943
+      551              3467.912
+      202              3100.726
+      583       583     588.618
+      135       135     157.796
+      237              2415.861
+      356              2833.561
+      387       387     365.453
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --    Build an XGBoost model with no eval_metric specified
@@ -362,20 +340,9 @@ SQL> DECLARE
  22          SET_LIST            =>  v_setlst);
  23  END;
  24  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 16
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -385,21 +352,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  FROM   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 261 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-FROM   SURVIVAL_DATA
-コマンド行 : 263 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND        PRED
+_________ _________ ___________
+      235              2256.184
+      444       444     485.286
+      806              4322.943
+      551              3467.912
+      202              3100.726
+      583       583     588.618
+      135       135     157.796
+      237              2415.861
+      356              2833.561
+      387       387     365.453
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --    Build an XGBoost model with aft_loss_distribution = logistic
@@ -437,20 +404,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -460,21 +416,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL USING *),3) PRED
   3  FROM   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 303 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL USING *),3) PRED
-FROM   SURVIVAL_DATA
-コマンド行 : 305 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND    PRED
+_________ _________ _______
+      235               0.5
+      444       444     0.5
+      806               0.5
+      551               0.5
+      202               0.5
+      583       583     0.5
+      135       135     0.5
+      237               0.5
+      356               0.5
+      387       387     0.5
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --    Build an XGBoost model with aft_loss_distribution = extreme
@@ -512,20 +468,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -535,21 +480,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  FROM   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 345 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-FROM   SURVIVAL_DATA
-コマンド行 : 347 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND       PRED
+_________ _________ __________
+      235              125.706
+      444       444      93.78
+      806              114.092
+      551              107.227
+      202              142.751
+      583       583      80.26
+      135       135     59.463
+      237              124.544
+      356              117.019
+      387       387     79.586
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --    Build an XGBoost model with aft_loss_distribution_scale = 0
@@ -586,20 +531,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -609,21 +543,21 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  From   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 386 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-From   SURVIVAL_DATA
-コマンド行 : 388 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND      PRED
+_________ _________ _________
+      235              74.132
+      444       444    74.132
+      806              74.132
+      551              74.132
+      202              74.132
+      583       583    74.132
+      135       135    74.132
+      237              74.132
+      356              74.132
+      387       387    74.132
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --          Create a table with only one numerical column
@@ -714,20 +648,9 @@ SQL> DECLARE
  23          SET_LIST            =>  v_setlst);
  24  END;
  25  /
-DECLARE
-*
-行でエラーが発生しました 1:
-ORA-40216: feature not supported
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 355
-ORA-06512: at "SYS.DBMS_DATA_MINING", line 603
-ORA-06512: at line 17
 
-https://docs.oracle.com/error-help/db/ora-40216/
+PL/SQLプロシージャが正常に完了しました。
 
-
-More Details :
-https://docs.oracle.com/error-help/db/ora-40216/
-https://docs.oracle.com/error-help/db/ora-06512/
 SQL>
 SQL> -----------------------------------------------------------------------------
 SQL> --                    Get Prediction Details
@@ -737,23 +660,23 @@ SQL> SELECT LBOUND, RBOUND,
   2         ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
   3  FROM   SURVIVAL_DATA;
 
-次の開始中にエラーが発生しました : 行 445 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql
-コマンド -
-SELECT LBOUND, RBOUND,
-       ROUND(PREDICTION(XGB_SURVIVAL_MODEL  USING *),3) PRED
-FROM   SURVIVAL_DATA
-コマンド行 : 447 列 : 8 ファイル @ file:/Users/ynakakoshi/Documents/oml4sql/oracle-db-examples/machine-learning/sql/23ai-sample-schema-v23.3-create-model2/oml4sql-survival-analysis-xgboost.sql でのエラー
-エラー・レポート -
-SQLエラー: ORA-40284: model does not exist
+   LBOUND    RBOUND     PRED
+_________ _________ ________
+      235              393.6
+      444       444    393.6
+      806              393.6
+      551              393.6
+      202              393.6
+      583       583    393.6
+      135       135    393.6
+      237              393.6
+      356              393.6
+      387       387    393.6
 
-https://docs.oracle.com/error-help/db/ora-40284/40284. 00000 -  "model does not exist"
-*Cause:    The model entered does not exist.
-*Action:   Check spelling.
+10行が選択されました。
 
-More Details :
-https://docs.oracle.com/error-help/db/ora-40284/
 SQL>
 SQL> -----------------------------------------------------------------------
 SQL> --   End of script
 SQL> -----------------------------------------------------------------------
-SQL> spool oml4sql-time-series-esm-auto-model-search
+SQL> spool oml4sql-time-series-regression
